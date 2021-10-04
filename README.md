@@ -42,7 +42,7 @@ of the source file.
 
 ## Version Diff
 
-    vdif file [diff-OPTION] ...
+    vdif file [diff-options] ...
 
 Compares a previous version to the current version of the file
 using diff.
@@ -51,10 +51,10 @@ Arguments after `file` are passed to diff.
 If `file` has the form `dest.v.nnn` where `nnn` is a version number,
 then this version is compared to the current version:
 
-    diff [diff OPTION] ... dest.v.nnn dest
+    diff [diff-options] ... dest.v.nnn dest
 
 otherwise the highest version is compared to the current version:
 
-    diff [diff OPTION] ... file.v.nnn file
+    diff [diff-options] ... file.v.nnn file
 
 where `nnn` is the highest version number.
