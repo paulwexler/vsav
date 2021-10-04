@@ -1,10 +1,8 @@
-# Add any directories, files, or patterns you don't want to be tracked by version control
+__pycache__
 *.pyc
 *.v.*
 .*.swp
 .coverage
-.coveragerc
-build/*
-dist/*
-MANIFEST
-*.egg-info/
+build
+dist
+*.egg-info
