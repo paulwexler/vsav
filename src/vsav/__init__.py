@@ -13,6 +13,10 @@ class VersionUtil:
     version suffixes: .v.nnn
     """
     encoding = 'utf-8'
+    version_code = 'v'
+    version_delimiter = '.'
+    version_len = 3
+    version_separator = f'{version_delimiter}{version_code}{version_delimiter}'
 
     @classmethod
     def diff(cls, fname, *diff_options):
@@ -26,18 +30,18 @@ class VersionUtil:
             return
         os.system(f'diff {" ".join(diff_options)} {specific} {current}')
 
-    @staticmethod
-    def get_highest_version(fname):
+    @classmethod
+    def get_highest_version(cls, fname):
         """
         return an int: the highest version of `fname`
         or -1 if no version is found.
         """
         highest_version = -1
-        prefix = f'{fname}.v.'
+        prefix = f'{fname}{cls.version_separator}'
         prefix_len = len(prefix)
         for fpath in glob.glob(f'{prefix}*'):
             suffix = fpath[prefix_len:]
-            if suffix.isdigit() and len(suffix) >= 3:
+            if suffix.isdigit() and len(suffix) >= cls.version_len:
                 version = int(suffix)
                 highest_version = max(version, highest_version)
         return highest_version
@@ -50,12 +54,12 @@ class VersionUtil:
         `specific` is `None` when no backup version of `current` exists.
         """
         specific = fname
-        flist = fname.split('.')
+        flist = fname.split(cls.version_delimiter)
         if (len(flist) > 2
-                and flist[-2] == 'v'
+                and flist[-2] == cls.version_code
                 and flist[-1].isdigit()
-                and len(flist[-1]) >= 3):
-            current = '.'.join(flist[0 : -2])
+                and len(flist[-1]) >= cls.version_len):
+            current = cls.version_delimiter.join(flist[0 : -2])
         else:
             current = fname
             version = cls.get_highest_version(fname)
@@ -63,8 +67,15 @@ class VersionUtil:
                 sys.stderr.write(f'cannot find backup version of {current}\n')
                 specific = None
             else:
-                specific = f'{fname}.v.{version:03d}'
+                specific = cls.get_specific(fname, version)
         return (specific, current)
+
+    @classmethod
+    def get_specific(cls, fname, version):
+        """
+        return filename of specific version.
+        """
+        return f'{fname}{cls.version_separator}{version:0{cls.version_len}}'
 
     @classmethod
     def restore(cls, fname):
@@ -92,7 +103,7 @@ class VersionUtil:
             sys.stderr.write(f'cannot read {fname}\n')
             return
         version = cls.get_highest_version(fname) + 1
-        latest = f'{fname}.v.{version:03d}'
+        latest = cls.get_specific(fname, version)
         with open(fname, 'r', encoding=cls.encoding) as inf:
             with open(latest, 'w', encoding=cls.encoding) as ouf:
                 ouf.write(inf.read())
